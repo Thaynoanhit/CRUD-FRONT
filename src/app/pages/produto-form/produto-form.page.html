@@ -1,0 +1,72 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/produtos"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ isEdit ? 'Editar' : 'Novo' }} Produto</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="produtoForm" (ngSubmit)="onSubmit()">
+   
+    <div class="image-container">
+      <div class="image-preview" 
+          [ngClass]="{'has-image': previewImage || existingImageUrl}">
+        <img *ngIf="previewImage || existingImageUrl" 
+            [src]="previewImage || existingImageUrl" 
+            alt="Imagem do produto">
+        <div *ngIf="!previewImage && !existingImageUrl" class="no-image">
+          <ion-icon name="image-outline"></ion-icon>
+          <p>Adicionar imagem</p>
+        </div>
+      </div>
+
+      <ion-button expand="block" color="medium" (click)="fileInput.click()" class="ion-margin-top">
+        <ion-icon name="camera-outline" slot="start"></ion-icon>
+        {{ (previewImage || existingImageUrl) ? 'Alterar imagem' : 'Selecionar imagem' }}
+      </ion-button>
+      <input 
+        #fileInput 
+        type="file" 
+        accept="image/jpeg,image/png,image/gif" 
+        style="display: none;" 
+        (change)="onFileChange($event)"
+      >
+    </div>
+
+   
+    <ion-item>
+      <ion-label position="floating">Nome </ion-label>
+      <ion-input formControlName="nome" type="text"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Preço </ion-label>
+      <ion-input formControlName="preco" type="number" min="0" step="0.01"></ion-input>
+    </ion-item>
+    
+    <ion-item>
+      <ion-label position="floating">Quantidade </ion-label>
+      <ion-input formControlName="quantidade" type="number" min="0"></ion-input>
+    </ion-item>
+    
+    <ion-item>
+      <ion-label position="floating">Categoria </ion-label>
+      <ion-input formControlName="categoria" type="text"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Descrição</ion-label>
+      <ion-textarea formControlName="descricao" rows="1"></ion-textarea>
+    </ion-item>
+
+    <ion-button 
+      expand="block" 
+      type="submit" 
+      class="ion-margin-top" 
+      [disabled]="produtoForm.invalid || isSubmitting">
+      {{ isSubmitting ? 'Salvando...' : 'Salvar' }}
+    </ion-button>
+  </form>
+</ion-content>
