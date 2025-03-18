@@ -20,6 +20,7 @@ export class ProdutoFormPage implements OnInit {
   previewImage: string | null = null;
   existingImageUrl: string | null = null;
   isSubmitting = false;
+  produtoOriginal: Produto | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -44,6 +45,7 @@ export class ProdutoFormPage implements OnInit {
       this.isEdit = true;
       const produto = await this.produtoService.getProduto(Number(id));
       if (produto) {
+        this.produtoOriginal = { ...produto };
         this.produtoForm.patchValue(produto);
         if (produto.imagem_url) {
           this.existingImageUrl = produto.imagem_url;
@@ -58,8 +60,6 @@ export class ProdutoFormPage implements OnInit {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       this.selectedImage = input.files[0];
-      
-      
       const reader = new FileReader();
       reader.onload = () => {
         this.previewImage = reader.result as string;
@@ -86,12 +86,19 @@ export class ProdutoFormPage implements OnInit {
       try {
         if (this.isEdit) {
           const produtoAtualizado = await this.produtoService.updateProduto(produto, this.selectedImage || undefined);
+          if (produtoAtualizado) {
+            await this.presentToast('Produto atualizado com sucesso');
+          } else {
+            await this.presentToast('Erro ao atualizar o produto', 'danger');
+          }
         } else {
-          
-          await this.produtoService.addProduto(produto, this.selectedImage || undefined);
-          await this.presentToast('Produto criado com sucesso');
+          const novoProduto = await this.produtoService.addProduto(produto, this.selectedImage || undefined);
+          if (novoProduto) {
+            await this.presentToast('Produto criado com sucesso');
+          } else {
+            await this.presentToast('Erro ao criar o produto', 'danger');
+          }
         }
-        
         this.router.navigate(['/produtos']);
       } catch (error) {
         console.error('Erro ao salvar produto:', error);
@@ -99,6 +106,8 @@ export class ProdutoFormPage implements OnInit {
       } finally {
         this.isSubmitting = false;
       }
+    } else {
+      await this.presentToast('Formulário inválido. Verifique os campos.', 'warning');
     }
   }
 }
